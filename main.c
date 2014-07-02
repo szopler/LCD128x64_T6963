@@ -3,21 +3,14 @@
 #include <util/delay.h>
 #include <avr/pgmspace.h>
 
-#define RAND_MAX 255
-#include <stdlib.h>
-
 #include "common.h"
 
 #include "Radzio_T6963_LIB/t6963c.h"
-//#include "Radzio_T6963_LIB/graphic.h"
-//#include "Fonts/mk_text.h"
-
 uint8_t GLCD_Buffer[1024];
 
 void _Init(void) {
 
 }
-
 
 FONT_INFO currentFont;
 
@@ -41,6 +34,11 @@ void Buffer_to_GLCD(void) {
 	}
 }
 
+void GLCD_Clear_Buffer(void) {
+	uint16_t address=0;
+	while (address<sizeof(GLCD_Buffer)) GLCD_Buffer[address++] = 0;
+}
+
 void Buffer_SetPixel(uint8_t x, uint8_t y, uint8_t color) {
 
 	uint8_t tmp;
@@ -59,7 +57,6 @@ void Buffer_SetPixel(uint8_t x, uint8_t y, uint8_t color) {
 }
 
 
-
 uint8_t Div_w_add(uint8_t dzielna, uint8_t dzielnik) {
 	uint8_t wynik, reszta;
 
@@ -70,7 +67,7 @@ uint8_t Div_w_add(uint8_t dzielna, uint8_t dzielnik) {
 	return wynik;
 }
 
-void Any_Bitmap(uint8_t * BITMAP, uint8_t X_POS, uint8_t Y_POS, uint8_t X_SIZE, uint8_t Y_SIZE) {
+void Any_Bitmap(uint16_t BITMAP, uint8_t X_POS, uint8_t Y_POS, uint8_t X_SIZE, uint8_t Y_SIZE) {
 
 	for(uint8_t l = 0; l < Y_SIZE; l++) {
 		for(uint8_t k = 0; k < Div_w_add(X_SIZE,8); k++) {
@@ -85,14 +82,13 @@ void Any_Bitmap(uint8_t * BITMAP, uint8_t X_POS, uint8_t Y_POS, uint8_t X_SIZE, 
 	}
 }
 
-void Font_Bitmap(FONT_CHAR_INFO * FONT, uint8_t cyfra, unsigned char x, unsigned char y) {
+void Font_Bitmap(FONT_CHAR_INFO * FONT, uint8_t cyfra, uint8_t posx, uint8_t posy) {
 	uint8_t width = pgm_read_byte(&currentFont.charInfo[cyfra].widthBits);
 	uint8_t height = pgm_read_byte(&MojFont_FontInfo.heightPixels);
 	uint16_t offset = pgm_read_word(&currentFont.charInfo[cyfra].offset);
 	//uint16_t address = pgm_read_byte(&MojFont_FontInfo.data) + offset;
 
-	Any_Bitmap((uint8_t*)(MojFont_FontInfo.data+offset), x, y, width, height);
-
+	Any_Bitmap((uint16_t)(MojFont_FontInfo.data+offset), posx, posy, width, height);
 
 	/*for(uint8_t l = 0; l < height; l++) {
 		for(uint8_t k = 0; k < Div_w_add(width,8); k++) {
@@ -108,8 +104,6 @@ void Font_Bitmap(FONT_CHAR_INFO * FONT, uint8_t cyfra, unsigned char x, unsigned
 }
 
 
-
-
 void digit(uint32_t liczba, uint8_t startx, uint8_t starty) {
 	char string[10];
 	char substring;
@@ -123,7 +117,7 @@ void digit(uint32_t liczba, uint8_t startx, uint8_t starty) {
 		substring = string[i];
 		cyfra = strtoul(&substring,NULL,0);
 		width = pgm_read_byte(&currentFont.charInfo[cyfra].widthBits);
-		Font_Bitmap(currentFont.charInfo, cyfra, startx+i*width, starty); //*width
+		Font_Bitmap(currentFont.charInfo, cyfra, startx+i*width, starty);
 		i++;
 	}
 }
@@ -133,14 +127,18 @@ int main(void) {
 	// sei();
 
 	GLCD_Initalize(); // Initalize LCD
-	GLCD_ClearText(); // Clear text area
-	GLCD_ClearCG(); // Clear character generator area
+	/*GLCD_ClearText(); // Clear text area
+	GLCD_ClearCG(); // Clear character generator area*/
 	GLCD_ClearGraphic(); // Clear graphic area
 
 	setCurrentFont(&MojFont_FontInfo);
 
-	/*Any_Bitmap((uint8_t *)MJS_Solutions,0,0,128,64);
-	Buffer_to_GLCD();*/
+	Any_Bitmap((uint16_t)&MJS_Solutions,0,0,128,64);
+	Buffer_to_GLCD();
+
+	_delay_ms(1500);
+
+	GLCD_Clear_Buffer();
 
 	while(1) {
 
