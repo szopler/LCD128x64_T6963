@@ -70,28 +70,7 @@ uint8_t Div_w_add(uint8_t dzielna, uint8_t dzielnik) {
 	return wynik;
 }
 
-void Font_Bitmap(FONT_CHAR_INFO * FONT, uint8_t cyfra, unsigned char x, unsigned char y) {
-	uint8_t width = pgm_read_byte(&currentFont.charInfo[cyfra].widthBits);
-	uint8_t height = pgm_read_byte(&MojFont_FontInfo.heightPixels);
-	uint16_t offset = pgm_read_word(&currentFont.charInfo[cyfra].offset);
-	uint16_t address = pgm_read_byte(&MojFont_FontInfo.data) + offset;
-
-	for(uint8_t l = 0; l < height; l++) {
-		for(uint8_t k = 0; k < Div_w_add(width,8); k++) {
-
-			uint8_t bajt = pgm_read_byte(address++);
-
-			for(uint8_t m=0; m<8; m++) {
-				uint8_t pixel = (bajt >> (7-m)) & 0x01;
-				Buffer_SetPixel(x+k*8+m, y+l, pixel);
-			}
-		}
-	}
-}
-
 void Any_Bitmap(uint8_t * BITMAP, uint8_t X_POS, uint8_t Y_POS, uint8_t X_SIZE, uint8_t Y_SIZE) {
-
-	//uint16_t j=0;
 
 	for(uint8_t l = 0; l < Y_SIZE; l++) {
 		for(uint8_t k = 0; k < Div_w_add(X_SIZE,8); k++) {
@@ -102,11 +81,33 @@ void Any_Bitmap(uint8_t * BITMAP, uint8_t X_POS, uint8_t Y_POS, uint8_t X_SIZE, 
 				uint8_t pixel = (bajt >> (7-m)) & 0x01;
 				Buffer_SetPixel(X_POS+k*8+m, Y_POS+l, pixel);
 			}
-			//j++;
 		}
-
 	}
 }
+
+void Font_Bitmap(FONT_CHAR_INFO * FONT, uint8_t cyfra, unsigned char x, unsigned char y) {
+	uint8_t width = pgm_read_byte(&currentFont.charInfo[cyfra].widthBits);
+	uint8_t height = pgm_read_byte(&MojFont_FontInfo.heightPixels);
+	uint16_t offset = pgm_read_word(&currentFont.charInfo[cyfra].offset);
+	//uint16_t address = pgm_read_byte(&MojFont_FontInfo.data) + offset;
+
+	Any_Bitmap((uint8_t*)(MojFont_FontInfo.data+offset), x, y, width, height);
+
+
+	/*for(uint8_t l = 0; l < height; l++) {
+		for(uint8_t k = 0; k < Div_w_add(width,8); k++) {
+
+			uint8_t bajt = pgm_read_byte(address++);
+
+			for(uint8_t m=0; m<8; m++) {
+				uint8_t pixel = (bajt >> (7-m)) & 0x01;
+				Buffer_SetPixel(x+k*8+m, y+l, pixel);
+			}
+		}
+	}*/
+}
+
+
 
 
 void digit(uint32_t liczba, uint8_t startx, uint8_t starty) {
@@ -138,15 +139,15 @@ int main(void) {
 
 	setCurrentFont(&MojFont_FontInfo);
 
-	Any_Bitmap((uint8_t *)MJS_Solutions,0,0,128,64);
-
-	Buffer_to_GLCD();
+	/*Any_Bitmap((uint8_t *)MJS_Solutions,0,0,128,64);
+	Buffer_to_GLCD();*/
 
 	while(1) {
 
-		/*static uint32_t licznik;
+		static uint32_t licznik;
 		digit(licznik++,0,10);
-		Buffer_to_GLCD();*/
+		Buffer_to_GLCD();
+
 		//_delay_ms(10);
 
 	}
