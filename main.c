@@ -89,11 +89,12 @@ void Any_Bitmap(uint16_t BITMAP, uint8_t X_POS, uint8_t Y_POS, uint8_t X_SIZE, u
 	}
 }
 
+
 void Font_Bitmap(uint8_t ascii, uint8_t posx, uint8_t posy) {
-	uint8_t width = pgm_read_byte(&currentFont.charInfo[ascii].widthBits);
+
 	uint8_t height = currentFont.heightPixels;
+	uint8_t width = pgm_read_byte(&currentFont.charInfo[ascii].widthBits);
 	uint16_t offset = pgm_read_word(&currentFont.charInfo[ascii].offset);
-	//uint16_t address = pgm_read_byte(&MojFont_FontInfo.data) + offset;
 
 	Any_Bitmap((uint16_t)(currentFont.data+offset), posx, posy, width, height);
 }
@@ -102,9 +103,8 @@ void Font_Bitmap(uint8_t ascii, uint8_t posx, uint8_t posy) {
 void digit(uint32_t liczba, uint8_t startx, uint8_t starty) {
 	char string[10];
 	char substring;
-	uint8_t i=0;
 	uint32_t cyfra;
-	uint8_t width=0;
+	uint8_t i=0, width=0;
 	uint8_t interspace = currentFont.interspacePixels;
 	uint8_t startchar = currentFont.startChar;
 
@@ -129,25 +129,20 @@ int main(void) {
 	GLCD_ClearCG(); // Clear character generator area*/
 	GLCD_ClearGraphic(); // Clear graphic area
 
-	setCurrentFont(&StdFont_5x8_FontInfo);
-	digit(123,0,2);
-
-
-	setCurrentFont(&MJS_1_Font_12x14_FontInfo);
-	digit(123,0,15);
-
+	Any_Bitmap((uint16_t)MJS_Solutions_Logo,0,0,128,64);
 	Buffer_to_GLCD();
+	_delay_ms(1500);
 
 	while(1) {
 
-		/*static uint32_t licznik;
+		static uint32_t licznik;
 		setCurrentFont(&StdFont_5x8_FontInfo);
 		digit(licznik,0,2);
 
 		setCurrentFont(&MJS_1_Font_12x14_FontInfo);
 		digit(licznik++,0,15);
 
-		Buffer_to_GLCD();*/
+		Buffer_to_GLCD();
 
 		//_delay_ms(10);
 

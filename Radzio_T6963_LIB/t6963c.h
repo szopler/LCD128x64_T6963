@@ -56,7 +56,11 @@
 #define T6963_SET_GRAPHIC_AREA				0x43
 
 #define T6963_MODE_SET						0x80
-
+#define T6963_EXOR_MODE						0x01
+#define T6963_AND_MODE						0x03
+#define T6963_TEXT_ATTR_MODE				0x04
+#define T6963_CG_ROM_MODE					0
+#define T6963_CG_RAM_MODE					0x08
 
 #define T6963_DISPLAY_MODE					0x90
 	#define T6963_CURSOR_BLINK_ON			0x01
