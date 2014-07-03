@@ -96,18 +96,6 @@ void Font_Bitmap(uint8_t ascii, uint8_t posx, uint8_t posy) {
 	//uint16_t address = pgm_read_byte(&MojFont_FontInfo.data) + offset;
 
 	Any_Bitmap((uint16_t)(currentFont.data+offset), posx, posy, width, height);
-
-	/*for(uint8_t l = 0; l < height; l++) {
-		for(uint8_t k = 0; k < Div_w_add(width,8); k++) {
-
-			uint8_t bajt = pgm_read_byte(address++);
-
-			for(uint8_t m=0; m<8; m++) {
-				uint8_t pixel = (bajt >> (7-m)) & 0x01;
-				Buffer_SetPixel(x+k*8+m, y+l, pixel);
-			}
-		}
-	}*/
 }
 
 
