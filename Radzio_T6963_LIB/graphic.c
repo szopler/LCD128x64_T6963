@@ -1,8 +1,8 @@
-extern void GLCD_SetPixel(char x, char y, char color);
+#include <avr/io.h>
 
-const unsigned char color = 1;
+extern void Buffer_SetPixel(uint8_t x, uint8_t y, uint8_t color);
 
-void GLCD_Rectangle(unsigned char x, unsigned char y, unsigned char b, unsigned char a)
+/*void GLCD_Rectangle(unsigned char x, unsigned char y, unsigned char b, unsigned char a)
 {
   unsigned char j; // zmienna pomocnicza
   // rysowanie linii pionowych (boki)
@@ -46,10 +46,10 @@ while(x >= y)
 	xchange += 2;
 	}
   }
-}
+}*/
 
 
-void GLCD_Line(int X1, int Y1,int X2,int Y2)
+void GLCD_Line(int X1, int Y1, int X2, int Y2, unsigned int kolorek)
 {
 int CurrentX, CurrentY, Xinc, Yinc, 
     Dx, Dy, TwoDx, TwoDy, 
@@ -81,7 +81,7 @@ if (Dy < 0) // jeœli sk³adowa pionowa jest ujemna
   TwoDy = -TwoDy; // jak równiez podwojonej sk³adowej
   }
 
-GLCD_SetPixel(X1,Y1, color); // stawiamy pierwszy krok (zapalamy pierwszy piksel)
+Buffer_SetPixel(X1,Y1, kolorek); // stawiamy pierwszy krok (zapalamy pierwszy piksel)
 
 if ((Dx != 0) || (Dy != 0)) // sprawdzamy czy linia sk³ada siê z wiêcej ni¿ jednego punktu ;)
   {
@@ -98,7 +98,7 @@ if ((Dx != 0) || (Dy != 0)) // sprawdzamy czy linia sk³ada siê z wiêcej ni¿ jedn
         CurrentY += Yinc; // zwiêkszamy aktualn¹ pozycjê w pionie
         TwoDxAccumulatedError -= TwoDx; // i odejmujemy TwoDx
         }
-       GLCD_SetPixel(CurrentX,CurrentY, color);// stawiamy nastêpny krok (zapalamy piksel)
+       Buffer_SetPixel(CurrentX,CurrentY, kolorek);// stawiamy nastêpny krok (zapalamy piksel)
        }while (CurrentX != X2); // idziemy tak d³ugo, a¿ osi¹gniemy punkt docelowy
      }
    else // w przeciwnym razie idziemy "po igrekach" 
@@ -113,7 +113,7 @@ if ((Dx != 0) || (Dy != 0)) // sprawdzamy czy linia sk³ada siê z wiêcej ni¿ jedn
           CurrentX += Xinc;
           TwoDyAccumulatedError -= TwoDy;
           }
-         GLCD_SetPixel(CurrentX,CurrentY, color); 
+         Buffer_SetPixel(CurrentX,CurrentY, kolorek);
          }while (CurrentY != Y2);
     }
   }

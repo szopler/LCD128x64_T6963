@@ -13,6 +13,8 @@ uint8_t GLCD_Buffer[1024];
 #include "MJS_1_Font_12x14.h"
 #include "bitmaps.h"
 
+#include "Radzio_T6963_LIB/graphic.h"
+
 void _Init(void) {
 
 }
@@ -74,7 +76,7 @@ uint8_t Div_w_add(uint8_t dzielna, uint8_t dzielnik) {
 	return wynik;
 }
 
-void Any_Bitmap(uint16_t BITMAP, uint8_t X_POS, uint8_t Y_POS, uint8_t X_SIZE, uint8_t Y_SIZE) {
+void Any_Bitmap(uint16_t BITMAP, uint8_t X_POS, uint8_t Y_POS, uint8_t X_SIZE, uint8_t Y_SIZE, uint8_t NEGATIVE) {
 
 	for(uint8_t l = 0; l < Y_SIZE; l++) {
 		for(uint8_t k = 0; k < Div_w_add(X_SIZE,8); k++) {
@@ -83,6 +85,9 @@ void Any_Bitmap(uint16_t BITMAP, uint8_t X_POS, uint8_t Y_POS, uint8_t X_SIZE, u
 
 			for(uint8_t m=0; m<8; m++) {
 				uint8_t pixel = (bajt >> (7-m)) & 0x01;
+				if (NEGATIVE) {
+				pixel ^= pixel;
+				}
 				Buffer_SetPixel(X_POS+k*8+m, Y_POS+l, pixel);
 			}
 		}
@@ -90,35 +95,67 @@ void Any_Bitmap(uint16_t BITMAP, uint8_t X_POS, uint8_t Y_POS, uint8_t X_SIZE, u
 }
 
 
-void Font_Bitmap(uint8_t ascii, uint8_t posx, uint8_t posy) {
+/*void Font_Bitmap(uint8_t ascii, uint8_t posx, uint8_t posy) {
 
 	uint8_t height = currentFont.heightPixels;
-	uint8_t width = pgm_read_byte(&currentFont.charInfo[ascii].widthBits);
-	uint16_t offset = pgm_read_word(&currentFont.charInfo[ascii].offset);
+	uint8_t width = pgm_read_byte(&currentFont.charInfo[ascii-33].widthBits);
+	uint16_t offset = pgm_read_word(&currentFont.charInfo[ascii-33].offset);
 
-	Any_Bitmap((uint16_t)(currentFont.data+offset), posx, posy, width, height);
-}
+	Any_Bitmap((uint16_t)(currentFont.data+offset), posx, posy, width, height, 0);
+}*/
 
 
-void digit(uint32_t liczba, uint8_t startx, uint8_t starty) {
+void digit(int32_t number, uint8_t pos_x, uint8_t pos_y, uint8_t negative) {
 	char string[10];
 	char substring;
-	uint32_t cyfra;
-	uint8_t i=0, width=0;
+	uint8_t digit;
+	uint8_t i=0;
 	uint8_t interspace = currentFont.interspacePixels;
 	uint8_t startchar = currentFont.startChar;
+	uint8_t height = currentFont.heightPixels;
+	uint8_t sign_width;
+	uint16_t offset;
 
-	ultoa(liczba,string,10);
+	ltoa(number, string, 10);
 
 	while (string[i]) {
 		substring = string[i];
-		cyfra = strtoul(&substring,NULL,0);
+		digit = strtol(&substring,NULL,0);
 
-		width = pgm_read_byte(&currentFont.charInfo[cyfra+48-startchar].widthBits)+interspace;
-		Font_Bitmap(cyfra+48-startchar, startx+i*width, starty);
+		sign_width = pgm_read_byte(&currentFont.charInfo[digit+48-startchar].widthBits);
+		offset = pgm_read_word(&currentFont.charInfo[digit+48-startchar].offset);
+		//Font_Bitmap(cyfra+48-startchar, startx+i*width, starty);
+
+		Any_Bitmap((uint16_t)(currentFont.data+offset), pos_x, pos_y, sign_width, height, 0);
+
+		pos_x = pos_x + interspace + sign_width;
 		i++;
 	}
 }
+
+void GLCD_write_str(char * str, uint8_t pos_x, uint8_t pos_y, uint8_t negative) {
+	uint8_t interspace = currentFont.interspacePixels;
+	uint8_t spacepixels = currentFont.spacePixels;
+	uint8_t startchar = currentFont.startChar;
+	uint8_t height = currentFont.heightPixels;
+	uint8_t sign_width;
+	uint16_t offset;
+
+	while( *str ) {
+		if ( *str > ' ' ) {
+			sign_width = pgm_read_byte( &currentFont.charInfo[ *str - startchar  ].widthBits );
+			offset = pgm_read_word( &currentFont.charInfo[ *str - startchar  ].offset );
+
+			Any_Bitmap((uint16_t)(currentFont.data+offset), pos_x, pos_y, sign_width, height, negative);
+
+			pos_x = pos_x + interspace + sign_width;
+		} else {
+			pos_x = pos_x + spacepixels;
+		}
+		str++;
+	}
+}
+
 
 int main(void) {
 	_Init();
@@ -129,22 +166,36 @@ int main(void) {
 	GLCD_ClearCG(); // Clear character generator area*/
 	GLCD_ClearGraphic(); // Clear graphic area
 
-	Any_Bitmap((uint16_t)MJS_Solutions_Logo,0,0,128,64);
+
+	setCurrentFont(&StdFont_5x8_FontInfo);
+	//Any_Bitmap((uint16_t)Background,0,0,128,64,0);
+
+
+
+	GLCD_write_str("02.03.1983",5,5,0);
+	GLCD_write_str("Abra kadabra!",5,15,0);
+
+	digit(15002900,5,25,0);
+
 	Buffer_to_GLCD();
-	_delay_ms(1500);
 
 	while(1) {
 
-		static uint32_t licznik;
-		setCurrentFont(&StdFont_5x8_FontInfo);
-		digit(licznik,0,2);
+		/*static uint32_t licznik;
 
-		setCurrentFont(&MJS_1_Font_12x14_FontInfo);
-		digit(licznik++,0,15);
+		for(uint8_t s=0; s<16; s++) {
 
-		Buffer_to_GLCD();
 
-		//_delay_ms(10);
+			setCurrentFont(&StdFont_5x8_FontInfo);
+			digit(licznik,0,2);
+
+			setCurrentFont(&MJS_1_Font_12x14_FontInfo);
+			digit(licznik++,0,15);
+
+			Buffer_to_GLCD();
+
+			_delay_ms(10);
+		}*/
 
 	}
 return 1;

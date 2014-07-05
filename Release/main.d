@@ -1,5 +1,6 @@
 main.d: ../main.c ../common.h ../Radzio_T6963_LIB/t6963c.h \
- ../StdFont_5x8.h ../MJS_1_Font_12x14.h ../bitmaps.h
+ ../StdFont_5x8.h ../MJS_1_Font_12x14.h ../bitmaps.h \
+ ../Radzio_T6963_LIB/graphic.h
 
 ../common.h:
 
@@ -10,3 +11,5 @@ main.d: ../main.c ../common.h ../Radzio_T6963_LIB/t6963c.h \
 ../MJS_1_Font_12x14.h:
 
 ../bitmaps.h:
+
+../Radzio_T6963_LIB/graphic.h:
